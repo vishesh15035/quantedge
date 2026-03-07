@@ -1,0 +1,32 @@
+name: QuantEdge CI
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+jobs:
+  test-python:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v4
+        with:
+          python-version: "3.11"
+      - run: pip install -r requirements.txt pytest
+      - run: pytest tests/ -v --tb=short
+  test-cpp:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: |
+          cd cpp
+          g++ -std=c++17 -O2 -Iinclude src/order_book.cpp src/indicators.cpp tests/test_orderbook.cpp -o test_ob
+          ./test_ob
+  build-frontend:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - run: cd frontend && npm install && npm run build
